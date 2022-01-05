@@ -1,0 +1,214 @@
+< 소스코드를 생성, 수정하고 Git 저장소에 반영하기 >
+
+[ 준비 ] 
+1. git-hub 계정을 생성
+2. 컴퓨터에서 git을 사용하기 위해 git 설치
+3. 컴퓨터와 git-hub가 안정적으로 연동되도록 환경설정
+명령 프롬프트 접속
+- git config --global user.name yih789
+- git config --global user.email yih789@naver.com
+
+[ 실행 ]
+1. 폴더 생성
+2. 폴더로 이동
+3. git clone '저장소 주소'
+=> 해당 '저장소 이름'의 폴더가 생성되면서 저장소에 있는 모든 파일이 업로드
+4. '저장소 이름' 폴더에 저장하고 싶은 파일들을 생성하면서 변경사항 업로드
+- git add 파일명
+- git commit -m "변경사항 정보 메세지"
+- git push
+
+- git add 파일명 OR git add . ~ add 되지 않은 모든 파일
+- git reset 파일명: add를 통해서 staging area에 올라간 파일을 다시 내려오게 한다.
+- git commit -m
+- git push
+
+
+
+- 기존 파일의 내용을 수정할 경우
+- git status: 변경사항이 commit되지 않았다고 알려준다.
+- git add and git commit을 진행할 수도 있고
+- git checkout -- 파일명: 수정사항을 반영하지 않고 파일의 상태도 수정 전 데이터로 돌아간다.
+
+
+< Commit 내역 수정하기 >
+
+- git commit -m "메세지"를 수행할 때 메세지 내용을 잘 못 입력했다면
+- git commit --amend 로 내용수정하고
+- git push 하면 괜찮다.
+but
+- git commit -m "메세지"
+- git push 후에
+- git commit --amend로 commit text를 변경한다면
+로컬저장소의 log에는 정상적으로 반영되지만 원격저장소의 commit에는 반영되지 않는다.
+- git push하면 둘의 상태가 달라 에러발생 하므로
+- git push -f 수행하면 된다.
+
+
+- git log: 모든 commit 정보를 보여준다.
+이때 특정 commit 지점으로 돌아가고 싶다면,
+- git reset --hard 'commit의 해시값': 해당 commit으로 돌아가고 이후의 commit을 모두 지워버린다.
+이때 나의 로컬저장소에는 reset이 반영되지만 원격저장소에는 반영되지 않은 상태이기 때문에
+git push를 하겠지만 둘의 구성이 다르기 때문에 에러가 발생한다.
+- git push -f: 강제로 push를 수행하여 로컬저장소와 원격저장소가 동일하게 만들어준다.
+
+
+
+< 브랜치의 개요 및 사용 >
+브랜치: 동시에 여러 개발자들이 프로젝트에서 각기 다른 기능을 개발할 수 있게 한다.
+서로 다른 브랜치는 서로에게 영향을 받지 않는다.
+
+master branch: git에서 default로 설정한 브랜치. 안정적인 상태로 배포 가능한 수준의 브랜치이다.
+나머지 branch: 특정 기능을 위해 만들어진 브랜치.
+나머지 branch의 변경사항을 수시로 master에 merge하여 배포하게 된다.
+
+
+- git branch: 브랜치의 목록
+- git branch '브랜치명': 새로운 브랜치 생성
+- git checkout '브랜치명': 해당 브랜치로 접속
+
+
+develop 브랜치 접속 후에 파일을 수정하여 add&commit 한다면 이것은 develop 브랜치에만 적용되고 main에는 적용되지 않았다.
+=> develop의 내용을 main을 통합하려면
+- git checkout main
+- git merge develop
+
+=> 병합의 역할을 다한 브랜치는 제거한다.
+- git branch -d develop
+
+==> 새로운 브랜치는 빈 데이터가 아니라 원본 main 브랜치의 최신 내용을 담으면서 가지치기 형식으로 옆으로 떨어져 나와 새로운 내용을 추가하는 것이다.
+
+
+< 브랜치 충돌 처리하기 >
+브랜치 충돌: 각각의 브랜치가 동일한 파일의 동일한 부분에 대해서 다르게 작성할 때 발생
+- git branch develop
+- git checkout develop
+==> develop 브랜치 상태에서 my_module.py에 dev함수 추가
+- git add .
+- git commit -m "Add my_module [Div]"
+- git log를 확인해보면
+"Add my_module [Div]" commit에 대해 HEAD가 develop을 가리키고 있고, main은 보이지 않는다.
+왜냐 develop 브랜치에만 적용되고 main에는 적용되지 않았기 때문이다.
+
+- git checkout main
+==> main 브랜치 상태에서 my_module.py에 dev함수에 주석 추가
+- git add .
+- git commit -m "Add my_module [Div] & Comment"
+- git log
+"Add my_module [Div] & Comment" commit에 대해 HEAD가 main을 가리키고 있고, develop은 보이지 않는다.
+
+* 병합은 main 브랜치에서 이루어진다.
+위의 상태에서
+- git merge develop
+==> 충돌발생
+
+==> my_module.py를 다시 열어보면 충돌이 발생한 부분을 표시해주고 수동으로 선택할 수 있게 한다.
+
+
+< 원격 저장소 관리하기 >
+- git remote: 원격 저장소 목록
+- git remote show '원격저장소명': 해당 원격저장소에 대한 정보
+- git remote add '원하는 저장소명' '원격저장소의 주소': 원격저장소 추가
+- git remote -v: 원격 저장소 전체 목록
+- git remote rename '기존 저장소명' '새로운 이름': 원격저장소 이름 변경
+- git remote rm '저장소명': 원격저장소 삭제
+
+< 로그 다루기 >
+=> log의 다양한 옵션 적용
+1. git log --stat: 몇 줄의 코드가 추가되었는지 함께 출력
+2. git log -p -3: 정확히 어떤 내용을 변경했는지 -3: 최근 3개만 출력
+3. git log --graph: 그래프로 출력
+4. git log --pretty=oneline: commit 정보를 한 줄로 간결하게 출력
+5. git log --pretty=format:"%h -> %an, %ar : %s" --graph
+그래프 형식으로 해시값, 작성자, 시간, 내용 출력
+
+==> git-hub에 commit이 보기좋게 기록되어 있고, insights로 그래프 형식도 확인할 수 있기 때문에 log 명령이 중요하진 않다.
+
+
+< Archive 명령으로 소스코드만 압축하기 >
+- cd 프로젝트 폴더
+- git archive --format=zip main -o ../Master.zip
+zip형식으로 main 브랜치를 ..상위폴더에 Main.zip이라는 이름으로 .git과 같은 메타데이터는 포함하지 않고 오직 소스코드만 압축하여 다운로드
+
+< Rebase 명령으로 특정 커밋을 수정/삭제하기 >
+- git rebase -i HEAD~3: 최근 3개 까지의 commit만 수정한다.
+- git rebase -i '특정 commit의 해시값': 해당 커밋을 제외하고 그 이후의 commit 수정한다.
+==> 에디터 안에서 reword, drop 이용해서 commit을 수정하고 삭제할 수 있다.
+
+==>'Drop Example1.txt' commit을 삭제하게 되면 마치 해당 commit이 없었던 것 처럼 Example1.txt 파일이 다시 돌아오는 것을 확인할 수 있다.
+
+==> 또한 rebase는 깊게 들어가면 많은 기능이 존재하기 때문에 별도로 공부하는 것이 좋다.
+
+< Config 환경 설정 >
+- git config --global --list: 내 컴퓨터의 git 환경설정 상태 확인
+- git config --global user.name "test"
+- git config --global user.email "test@naver.com"
+==> --global 옵션으로 특정 프로젝트가 아니라 컴퓨터 전체에 환경설정 가능
+
+==> window의 .gitconfig 파일 경로: 보통 C:\사용자\$USER ==>git config --global --list의 내용과 동일하다.
+==> git config --global로 설정 변경해도 되고 위의 .gitconfig 파일에 접근하여 직접 파일 내용을 수정해도 설정 변경이 가능하다.
+
+==> 위는 특정 프로젝트의 git config 설정이 아니라 내 컴퓨터의 git config 설정이고
+
+==> 특정 프로젝트의 git config를 따로 설정할 수 있다.
+- cd 프로젝트 경로
+- git config --list: 해당 프로젝트의 환경설정까지 확인할 수 있다.
+- git config user.name "test": 해당 프로젝트의 user.name을 변경
+- git config --list를 수행하면
+--global user.name:yih789와 user.name:test가 둘 다 출력된다.
+==> 사용자를 test로 바꾼 위의 상황에서
+==> 새로운 파일을 생성하고 add & commit 하면
+- git log 에서 작성자 이름이 test인 것을 확인할 수 있다.
+==>중복되는 설정에 한해서 --global config보다 특정 프로젝트의 config가 우선시 된다는 것을 알 수 있다.
+
+
+< Commit의 날짜 변경 및 Committer 변경하기 >
+* 단어 사이사이 띄어쓰기를에 주의
+
+[날짜 변경]
+1. rebase 이용
+=> cmd 창에서 되지 않으면 git bash창 이용
+- git rebase -i 'commit 해시값'
+=> edit 사용
+- GIT_COMMITER_DATE="Tue Jan 1 11:38:06 2022 +0900" git commit --amend --no-edit --date "Tue Jan 1 11:38:06 2022 +0900"
+- git rebase --continue
+==> 반영완료
+
+2. filter-branch 이용
+git filter-branch -f --env-filter \
+'if [ $GIT_COMMIT = commit해시값 ]
+then
+export GIT_AUTHOR_DATE="Nov 25 11:38:06 2021 +0900"
+export GIT_COMMITER_DATE="Nov 25 11:38:06 2021 +0900"
+fi'
+
+
+[ commiter의 이름과 이메일 변경 ]
+==> 아래 전체를 복사하여 사용
+
+git filter-branch -f --env-filter ' \
+
+OLD_EMAIL="yih789@naver.com"
+CORRECT_NAME="yih789"
+CORRECT_EMAIL="yih789@naver.com"
+
+if [ $GIT_COMMITTER_EMAIL = $OLD EMAIL ]
+then
+export GIT_COMMITER_NAME="$CORRECT_NAME"
+exprot GIT_COMMITER_EMAIL="$CORRECT_EMAIL"
+fi
+if [ $GIT_AUTHOR_EMAIL = $OLD_EMAIL ]
+then
+export GIT_AUTHOR_NAME="$CORRECT_NAME"
+export GIT_AUTHOR_EMAIL="$CORRECT_EMAIL"
+fi'
+
+
+
+
+
+
+
+
+
+
